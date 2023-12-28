@@ -3,10 +3,12 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { apiHealth } from "./controllers/health.js";
 import {postApiv1Signup,postApiv1Login} from "./controllers/user.js"
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser())
 
 const connDB = () => {
   const conn = mongoose.connect(process.env.MONGO_DB_URI);
