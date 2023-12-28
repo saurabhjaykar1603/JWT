@@ -53,19 +53,34 @@ const postApiv1Login = async (req, res) => {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRETE_KEY, {
         expiresIn: "3h",
       });
-      user.token = token;
+      const refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRETE_KEY,
+        {
+          expiresIn: "5m"
+        }
+      );
+
+      user.refreshToken = refreshToken;
+      await user.save();
       user.password = undefined;
       // send token to uset cookei
-      // cookie section
+      // cookie section 
       const option = {
         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
         httpOnly: true,
       };
-      res.status(200).cookie("token", token, option).json({
+      res.cookie('token', token, option);
+      res.cookie('refreshToken', refreshToken, { httpOnly: true });
+      res.status(200).json({
         success: true,
         token,
-        user,
-      });
+        refreshToken,
+        user: user
+    });
+    }
+    else{
+      res.status(404).json({ message: "User not found" })
     }
   } catch (err) {
     res.status(401).json({
